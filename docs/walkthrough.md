@@ -28,7 +28,7 @@ Phase 5 has successfully introduced educational resources and intelligent qualit
 - Verified INVEST scoring and risk detection in the Intelligence Scanner.
 - Confirmed regression alignment of existing Feature Breakdown tools.
 
-![Phase 5 Verification](file:///C:/Users/nhutv/.gemini/antigravity/brain/34a06159-79db-4dc8-ac96-33a458c5902f/verify_phase5_fixed_1773590315264.webp)
+![Phase 5 Verification](media/verify_phase5.webp)
 *Recording of the Phase 5 feature set and US Intelligence analysis.*
 
 ## Technical Details
