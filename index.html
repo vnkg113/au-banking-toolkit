@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>AuPromptKit — Australian Banking BA Toolkit</title>
+  <meta name="description" content="Curated AI prompt library for Business Analysts in the Australian Banking and Financial Services sector. Covering APRA, CDR, NPP, and more."/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">🦘</div>
+    <div>
+      <div class="logo-name">AuPromptKit</div>
+      <div class="logo-tag">Australian Banking Toolkit</div>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">‹</button>
+  </div>
+
+  <nav class="sidebar-nav" id="sidebarNav">
+    <!-- Rendered by JS -->
+  </nav>
+
+  <div class="sidebar-foot">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+      <button class="btn-add" id="openAdd" style="margin-bottom: 0;">
+        <span>＋</span> <span class="sidebar-text">Add Prompt</span>
+      </button>
+      <button class="btn-tool" id="openStats" title="View basic stats">📊 <span class="sidebar-text">Stats</span></button>
+    </div>
+    <button class="btn-add" id="openScanner" style="margin-bottom: 8px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
+      <span>🪄</span> <span class="sidebar-text">Feature Breakdown</span>
+    </button>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-tool" id="exportBtn" title="Export custom prompts">⬇ <span class="sidebar-text">Export</span></button>
+      <button class="btn-tool" id="importBtn" title="Import custom prompts">⬆ <span class="sidebar-text">Import</span></button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" />
+    </div>
+  </div>
+</aside>
+
+<!-- Collapsed sidebar expand tab -->
+<button class="sidebar-expand-tab" id="sidebarExpandTab" title="Expand sidebar">🦘</button>
+
+<!-- ── MAIN ─────────────────────────────────────────────── -->
+<main class="main">
+  <!-- Topbar -->
+  <header class="topbar">
+    <span class="topbar-title" id="pageTitle">All Prompts</span>
+    <span class="topbar-count" id="pageCount"></span>
+
+    <div class="search-box">
+      <span class="search-ic">⌕</span>
+      <input type="text" id="searchInp" class="search-inp" placeholder="Search prompts… (e.g. APRA, CDR, NPP)" autocomplete="off"/>
+      <button class="search-clear" id="searchClear" style="display:none">✕</button>
+    </div>
+
+    <div class="topbar-actions">
+      <button id="darkModeToggle" class="view-btn" title="Toggle Dark Mode" style="border-radius: 50%;">🌙</button>
+      <select id="sortSelect" class="sort-select" title="Sort prompts">
+        <option value="default">Default</option>
+        <option value="az">A → Z</option>
+        <option value="za">Z → A</option>
+        <option value="used">Most Used</option>
+        <option value="recent">Recently Used</option>
+      </select>
+      <button class="view-btn active" id="gridBtn" title="Grid view">⊞</button>
+      <button class="view-btn" id="listBtn" title="List view">☰</button>
+    </div>
+  </header>
+
+  <!-- Quick Filters -->
+  <div class="quick-filters" id="quickFilters">
+    <!-- Rendered by JS -->
+  </div>
+
+  <!-- Cute Welcome Heading -->
+  <div class="cute-welcome" id="cuteWelcome">
+    <div class="cute-icon">🐨</div>
+    <div class="cute-text">
+      <span class="cute-title">G'day there, BA! 👋</span>
+      <span class="cute-subtitle">Ready to write some top-notch requirements today? Let's make magic happen! ✨</span>
+    </div>
+  </div>
+
+  <!-- Tag strip -->
+  <div class="tag-strip" id="tagStrip"></div>
+
+  <!-- Cards -->
+  <div class="prompt-area">
+    <div class="prompt-grid" id="promptGrid"></div>
+    <div class="empty" id="emptyState" style="display:none">
+      <div class="empty-ico">🔎</div>
+      <div class="empty-title">No prompts found</div>
+      <div class="empty-sub">Try adjusting your search or category filter</div>
+    </div>
+  </div>
+</main>
+
+<!-- ── DETAIL MODAL ──────────────────────────────────────── -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal modal-detail">
+    <div class="m-header">
+      <div class="m-header-left">
+        <span id="detailChip" class="cat-chip"></span>
+        <h2 class="m-title" id="detailTitle"></h2>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="star-rating" id="detailStars"></div>
+        <button class="m-close" id="detailClose">✕</button>
+      </div>
+    </div>
+
+    <div class="m-body">
+      <div>
+        <div class="m-sec-label">📌 When to use</div>
+        <div class="m-when" id="detailWhen"></div>
+      </div>
+      <div>
+        <div class="m-sec-label">💬 Prompt Template <span class="placeholder-count" id="placeholderCount"></span></div>
+        <div class="prompt-box" id="detailPrompt"></div>
+      </div>
+      <div id="tipsSection">
+        <div class="m-sec-label">💡 Tips</div>
+        <ul class="tips-list" id="detailTips"></ul>
+      </div>
+    </div>
+
+    <div class="m-footer">
+      <button class="btn-fav" id="detailFav">☆ Favourite</button>
+      <button class="btn-fill" id="detailFill" style="display:none">✏️ Fill Variables</button>
+      <button class="btn-gemini" id="detailGemini">✦ Open in Gemini</button>
+      <button class="btn-copy-main" id="detailCopy">📋 Copy Prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FILL VARIABLES MODAL ───────────────────────────────── -->
+<div class="overlay" id="fillOverlay">
+  <div class="modal modal-fill">
+    <div class="m-header">
+      <div class="m-header-left">
+        <span class="cat-chip chip-requirements">✏️ Fill Variables</span>
+        <h2 class="m-title" id="fillTitle">Complete Your Prompt</h2>
+      </div>
+      <button class="m-close" id="fillClose">✕</button>
+    </div>
+    <div class="m-body fill-layout">
+      <div class="fill-inputs" id="fillInputs"><!-- dynamic --></div>
+      <div class="fill-preview-wrap">
+        <div class="m-sec-label">📋 Live Preview</div>
+        <div class="prompt-box fill-preview" id="fillPreview"></div>
+      </div>
+    </div>
+    <div class="m-footer">
+      <button class="btn-cancel-sm" id="fillCancel">← Back</button>
+      <button class="btn-gemini" id="fillGemini">✦ Open in Gemini</button>
+      <button class="btn-copy-main" id="fillCopy">📋 Copy Filled Prompt</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── ADD / EDIT MODAL ─────────────────────────────────── -->
+<div class="overlay" id="addOverlay">
+  <div class="modal modal-add">
+    <div class="m-header">
+      <div class="m-header-left">
+        <h2 class="m-title" id="addModalTitle">Add Custom Prompt</h2>
+      </div>
+      <button class="m-close" id="addClose">✕</button>
+    </div>
+
+    <div class="m-body">
+      <div class="form-row">
+        <label class="form-label" for="cTitle">Title *</label>
+        <input type="text" id="cTitle" class="form-ctrl" placeholder="e.g. APRA Monthly Liquidity Report"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="cCategory">Category *</label>
+        <select id="cCategory" class="form-ctrl"></select>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="cWhen">When to use</label>
+        <input type="text" id="cWhen" class="form-ctrl" placeholder="Briefly describe when this prompt is useful"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="cPrompt">Prompt Template *</label>
+        <textarea id="cPrompt" class="form-ctrl" placeholder="Paste your full prompt here…"></textarea>
+      </div>
+
+      <div id="historyWrap" style="display:none; margin-top: 10px;">
+        <div class="m-sec-label">🕒 Edit History</div>
+        <div id="historyList" class="history-list"></div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="cTags">Tags <span style="color:var(--t3);">(comma separated)</span></label>
+        <input type="text" id="cTags" class="form-ctrl" placeholder="e.g. APRA, CDR, NPP, compliance"/>
+      </div>
+    </div>
+
+    <div class="m-footer">
+      <button class="btn-cancel-sm" id="addCancel">Cancel</button>
+      <button class="btn-save-sm" id="addSave">Save Prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FEATURE SCANNER MODAL ─────────────────────────────── -->
+<div class="overlay" id="scannerOverlay">
+  <div class="modal modal-add" style="width: min(640px, 100%)">
+    <div class="m-header">
+      <div class="m-header-left">
+        <span class="cat-chip chip-feature_breakdown">🪄 AI Feature Breakdown</span>
+        <h2 class="m-title" id="scannerTitle">Generate Breakdown Prompt</h2>
+      </div>
+      <button class="m-close" id="scannerClose">✕</button>
+    </div>
+
+    <div class="m-tabs">
+      <button class="m-tab-btn active" data-tab="breakdown">Breakdown</button>
+      <button class="m-tab-btn" data-tab="intelligence">Intelligence (US Check)</button>
+    </div>
+
+    <div class="m-body tab-content" id="tab-breakdown">
+      <div class="m-sec-label" style="text-transform:none; font-weight: 500; font-size: 13px; color: var(--t2);">
+        <strong>Step 1: Generate AI Prompt</strong><br/>
+        Provide links or select a local folder containing your feature materials (requirements, Figma designs, solution designs). This tool generates a master prompt to feed into Gemini/ChatGPT to break down your feature into estimated User Stories.
+      </div>
+      
+      <div class="form-row">
+        <label class="form-label">Feature / Epic Name *</label>
+        <input type="text" id="scanFeatureName" class="form-ctrl" placeholder="e.g. Osko Payment Integration"/>
+      </div>
+      <div class="form-row" style="flex-direction: row; gap: 12px;">
+        <div style="flex:1" class="form-row">
+          <label class="form-label">Material Links (Optional)</label>
+          <textarea id="scanLinks" class="form-ctrl" placeholder="Paste all relevant URLs here..." style="min-height: 50px"></textarea>
+        </div>
+        <div style="flex:1" class="form-row">
+          <label class="form-label">Scan Folder (Reads structure)</label>
+          <input type="file" id="scanFolder" webkitdirectory directory multiple class="form-ctrl" style="padding: 6px; cursor: pointer;"/>
+          <div id="scanFolderResult" style="font-size: 11px; color: var(--t3); margin-top: 4px;">No folder selected</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Additional Context (Optional)</label>
+        <textarea id="scanContext" class="form-ctrl" placeholder="Key business rules, technical constraints, target audience..." style="min-height: 50px"></textarea>
+      </div>
+
+      <div id="scanResultSection" style="display:none; margin-top: 10px; margin-bottom: 2px;">
+        <div class="m-sec-label">Generated Prompt</div>
+        <div class="prompt-box" id="scanResultPrompt" style="user-select: all; max-height: 120px; overflow-y: auto;"></div>
+      </div>
+
+      <div style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+        <div class="m-sec-label" style="text-transform:none; font-weight: 500; font-size: 13px; color: var(--t2);">
+          <strong>Step 2: Export to Jira</strong><br/>
+          Paste the CSV output from Gemini here to download a Jira-ready CSV file.
+        </div>
+        <div class="form-row" style="margin-top:8px;">
+          <textarea id="scanJiraOutput" class="form-ctrl" placeholder='IssueType,Summary,Description,Priority,"Story Points","Epic Link",Labels...' style="min-height: 80px"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="m-body tab-content" id="tab-intelligence" style="display:none">
+      <div class="m-sec-label" style="text-transform:none; font-weight: 500; font-size: 13px; color: var(--t2);">
+        <strong>US Quality Check & Linting</strong><br/>
+        Paste your draft User Story here. We'll check it against INVEST & Gherkin standards while identifying Australian banking compliance risks.
+      </div>
+      <div class="form-row">
+        <label class="form-label">Draft User Story / ACs *</label>
+        <textarea id="intelInput" class="form-ctrl" placeholder="As a customer, I want to..." style="min-height: 120px"></textarea>
+      </div>
+      <button class="btn-save-sm" id="intelRun">Analyze Story 🧠</button>
+
+      <div id="intelResultSection" style="display:none; margin-top: 16px;">
+        <div class="intel-metrics">
+          <div class="intel-metric" id="metric-invest">
+            <span class="m-label">INVEST Score</span>
+            <span class="m-val" id="val-invest">-%</span>
+          </div>
+          <div class="intel-metric" id="metric-bank">
+            <span class="m-label">Bank Compliance</span>
+            <span class="m-val" id="val-bank">Low Risk</span>
+          </div>
+        </div>
+        
+        <div class="m-sec-label">📋 Gherkin Transformation</div>
+        <div class="prompt-box" id="intelGherkin" style="max-height: 150px; overflow-y: auto;"></div>
+        
+        <div class="m-sec-label" style="margin-top:12px">💡 Improvement Suggestions</div>
+        <ul class="tips-list" id="intelTips"></ul>
+      </div>
+    </div>
+
+    <div class="m-footer" style="flex-wrap: wrap; gap: 8px;">
+      <button class="btn-cancel-sm" id="scannerCancel">Close</button>
+      <div style="flex:1"></div>
+      <button class="btn-gemini" id="scannerGemini" style="display:none">✦ Open in Gemini</button>
+      <button class="btn-copy-main" id="scannerCopy" style="display:none; margin-right: 12px;">📋 Copy Prompt</button>
+      <button class="btn-save-sm" id="scannerGenerate">Generate Prompt 🪄</button>
+      <button class="btn-save-sm" id="scannerExportJira" style="background:#0052cc; border-color:#0052cc; color:#fff;">Download Jira CSV ⬇</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── STATS MODAL ───────────────────────────────────────── -->
+<div class="overlay" id="statsOverlay">
+  <div class="modal modal-add" style="width: min(500px, 100%)">
+    <div class="m-header">
+      <div class="m-header-left">
+        <h2 class="m-title">Library Insights</h2>
+      </div>
+      <button class="m-close" id="statsClose">✕</button>
+    </div>
+    <div class="m-body" id="statsBody">
+      <!-- dynamic -->
+    </div>
+    <div class="m-footer">
+      <button class="btn-cancel-sm" id="statsDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- DATA -->
+<script src="data.js"></script>
+<script src="data-extra.js"></script>
+<script src="data-v4.js"></script>
+<script src="data-howto.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
