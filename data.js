@@ -1087,4 +1087,189 @@ Domain: Australian banking. All requirements must be specific and measurable.`,
     ],
     tags: ['PRD', 'documentation', 'APRA', 'CDR', 'Australian banking'],
   },
+  
+  // ─── NEW PROFESSIONAL ADDITIONS ────────────────────────────
+  {
+    id: 'dia-001',
+    category: 'diagrams',
+    title: 'NPP / Osko Payment Sequence (Mermaid)',
+    when: 'When visualizing the real-time payment flow between a Payer, ADI, and the NPP Infrastructure.',
+    prompt: `Act as a Solution Architect specializing in Australian Payments (NPP).
+
+Generate a Mermaid.js Sequence Diagram for:
+[SPECIFIC SCENARIO e.g., A real-time PayID transfer from CommBank to ANZ]
+
+Include the following participants:
+- **Payer App:** User interface / Mobile banking.
+- **Originating ADI (O-ADI):** The payer's bank core systems.
+- **NPP Infrastructure (NPPI):** Central settlement / orchestration.
+- **Receiving ADI (R-ADI):** The payee's bank core systems.
+
+Sequence should cover:
+1. PayID Lookup (Alias resolution).
+2. Fraud & Limit check by O-ADI.
+3. Instruction submission to NPPI.
+4. Real-time settlement (RITS).
+5. Notification to R-ADI and Crediting of the Payee.
+
+Use standard Mermaid syntax and include detailed notes on data payloads (e.g. End-to-End ID).`,
+    tips: [
+      'Real-time payments are settled individually in the NPP, unlike deferred net settlement (BECS).',
+      'Ensure the PayID lookup happens BEFORE the payment instruction is confirmed by the user.',
+    ],
+    tags: ['npp', 'payments', 'sequence diagram', 'mermaid', 'architecture'],
+  },
+  {
+    id: 'api-001',
+    category: 'api',
+    title: 'CDR Data Holder: Get Accounts API Spec',
+    when: 'When designing a CDS-compliant API for sharing account data as a Data Holder.',
+    prompt: `Act as an API Designer for an Australian Bank. 
+
+Draft a Swagger/OpenAPI 3.0 snippet for the following CDR (Consumer Data Standards) endpoint:
+**GET /banking/accounts**
+
+Include:
+1. **Request Headers:** x-v, x-fapi-interaction-id, etc.
+2. **Query Parameters:** product-category, is-owned, page, page-size.
+3. **Response Body (200 OK):** Using the "BankingAccountV2" schema.
+4. **Key Fields:** accountId, displayName, nickname, maskedNumber, openStatus, accountOwnership.
+
+Adhere strictly to the latest Australian Consumer Data Standards (CDS).`,
+    tips: [
+      'The x-v header (versioning) is mandatory in CDR and must be incremented thoughtfully.',
+      'MaskedNumber must follow the exact syntax of the standards (e.g. 1234-XXXX-XXXX-4321).',
+    ],
+    tags: ['api', 'cdr', 'openapi', 'swagger', 'banking'],
+  },
+  {
+    id: 'doc-001',
+    category: 'documentation',
+    title: 'Agile Story Map: International Payments',
+    when: 'When mapping out the rollout of a complex new feature like SWIFT Go or real-time FX.',
+    prompt: `Generate a 3-Phase Agile Story Map for:
+**Feature:** [e.g., Cross-Border Payments for SME Customers]
+
+Structure:
+- **Phase 1 (MVP/Foundation):** Essential connectivity, FX rates, and manual clearing.
+- **Phase 2 (Scalability):** Automated tracking (SWIFT gpi), additional currencies.
+- **Phase 3 (Premium):** Real-time tracking portal, hedging tools, and bulk payments.
+
+For each Phase, list:
+1. **Backbone Tasks:** Search, Authorise, Send, Track.
+2. **User Stories:** 3-4 example stories with "So that" value statements.
+
+Use a Markdown table for the mapping.`,
+    tips: [
+      'Always prioritize "Sanctions Screening" in Phase 1 for any international payment flow.',
+      'Think about the "Correspondent Banking" chain and how it impacts "Track" requirements.',
+    ],
+    tags: ['story map', 'agile', 'international payments', 'swift', 'roadmap'],
+  },
+  {
+    id: 'dat-001',
+    category: 'data',
+    title: 'Customer PII Data Dictionary (Privacy Act)',
+    when: 'When cataloging Customer Data (PII) for an Australian bank, aligning with the Privacy Act 1988.',
+    prompt: `Create a Data Dictionary / Mapping for Customer PII (Personally Identifiable Information) for: [FEATURE NAME e.g., Onboarding].
+
+Provide a table with:
+- **Field Name:** (e.g., Full Name, DOB, TFN, Passport No).
+- **Data Classification:** (e.g., Restricted / Sensitive / Internal).
+- **Encryption Requirement:** (At rest / In transit / Field-level).
+- **Retention Period:** (How many years as per AML/CTF rules?).
+- **Regulatory Requirement:** (Which clause of the Privacy Act or AML Act applies?).
+
+List at least 10 critical banking PII fields.`,
+    tips: [
+      'Tax File Numbers (TFN) have extremely strict handling rules in Australia — never store them in plain text.',
+      'Refer to "Privacy Principle 11" for data security obligations.',
+    ],
+    tags: ['data dictionary', 'pii', 'privacy act', 'compliance', 'security'],
+  },
+  {
+    id: 'reg-001',
+    category: 'apra',
+    title: 'CPS 230: Critical Business Service Mapping',
+    when: 'When mapping out critical services and their dependencies as required by APRA CPS 230.',
+    prompt: `Act as a Risk & Continuity BA. Generate a Dependency Map for a Critical Business Service.
+
+**Service Name:** [e.g., Real-time Payment Settlement]
+
+Identify:
+1. **Upstream Dependencies:** What data/events trigger this?
+2. **Internal Dependencies:** Core systems, databases, internal teams.
+3. **External Dependencies:** Material service providers (e.g., NPP, Cloud Hosting).
+4. **Tolerance Levels:** Max allowable disruption (Time/Data/Service).
+
+Structure as a nested list or a simple Mermaid diagram.`,
+    tips: [
+      'APRA expects you to know exactly which Cloud Provider and specific availability zone you depend on.',
+      'The "Impact Tolerance" is the most critical metric for CPS 230.',
+    ],
+    tags: ['apra', 'cps 230', 'risk', 'continuity', 'mapping'],
+  },
+  {
+    id: 'loan-001',
+    category: 'loans',
+    title: 'Home Loan Serviceability Calculation Logic',
+    when: 'When defining the calculation engine requirements for a retail mortgage product.',
+    prompt: `Define the Business Logic for a Home Loan Serviceability assessment.
+
+**Product:** [e.g., Principal & Interest Investment Loan]
+
+Include logic for:
+1. **Net Income Verification:** Base salary vs Bonus vs Rental income haircut.
+2. **Living Expenses:** HEM (Household Expenditure Measure) vs Declared Actuals.
+3. **Repayment Buffers:** Current Rate + 3% test rate (APRA requirement).
+4. **Other Liabilities:** Personal loans, Credit cards (using 3.8% limit rule).
+
+Provide the output as a set of logical "If/Then" rules for developers.`,
+    tips: [
+      'The APRA serviceability buffer (currently ~3%) is a mandatory requirement for ADIs.',
+      'Haircut rules for rental income (usually 20-25%) are standard to account for vacancy risk.',
+    ],
+    tags: ['loans', 'mortgages', 'serviceability', 'apra', 'logic'],
+  },
+  {
+    id: 'qa-001',
+    category: 'testing',
+    title: 'Core Banking Regression Strategy',
+    when: 'When planning testing for a major core system upgrade or patch.',
+    prompt: `Develop a Regression Test Strategy for a [Core Banking System Name] version upgrade.
+
+Identify:
+1. **Priority 1 (Critical Flows):** Transaction posting, interest calc, balance inquiry.
+2. **Priority 2 (Standard Flows):** Account opening, statement generation.
+3. **Data Migration Verification:** Sampling strategy for checking DB record integrity.
+4. **API Backward Compatibility:** Mocking strategies for downstream consumers.
+
+Provide a high-level test plan with 10 critical test scenarios.`,
+    tips: [
+      'In core banking upgrades, "End-of-Day (EOD) Processing" is the most likely failure point.',
+      'Always test interest calculation to at least 4 decimal places.',
+    ],
+    tags: ['testing', 'regression', 'core banking', 'qa', 'strategy'],
+  },
+  {
+    id: 'proto-001',
+    category: 'prototyping',
+    title: 'High-Fidelity Mobile UI Logic & Haptics',
+    when: 'When defining exactly how a mobile banking interaction should FEEL and BEHAVE.',
+    prompt: `Define the detailed UI Interaction Logic and Haptic Feedback for: [FEATURE NAME e.g., Swipe-to-Pay].
+
+Detail:
+1. **Initial State:** Visual cues (shadows, icons).
+2. **Active Interaction:** Gesture tracking (displacement threshold).
+3. **Success State:** Micro-animation, celebratory haptics (iOS/Android specific).
+4. **Error/Failure State:** "Shake" animation, heavy haptic feedback.
+5. **Accessibility:** Screen reader announcements for each state change.
+
+Focus on creating a "Premium" and secure digital experience.`,
+    tips: [
+      'Haptics provide confidence in digital banking transactions where visual confirmation might be subtle.',
+      'Ensure the swipe threshold is consistent with standard OS patterns.',
+    ],
+    tags: ['prototyping', 'ui', 'ux', 'haptics', 'mobile'],
+  }
 ];
