@@ -5,19 +5,19 @@
 // ============================================================
 
 const V4_CATEGORIES = [
-  { id: 'us_ui',              label: 'US: Frontend / UI',     icon: '💻' },
-  { id: 'us_bff',             label: 'US: BFF / Orchestration', icon: '🔗' },
-  { id: 'us_backend',         label: 'US: Backend / Core',    icon: '⚙️' },
-  { id: 'us_spike',           label: 'US: Tech Spike',        icon: '🔬' },
-  { id: 'us_techdebt',        label: 'US: Tech Debt',         icon: '🧹' },
-  { id: 'us_deploy',          label: 'US: Deployment',        icon: '🚀' },
-  { id: 'us_compliance',      label: 'US: Compliance Gate',   icon: '⚖️' },
+  { id: 'us_ui',              label: 'US: Frontend / UI',     icon: 'monitor', groupId: 'tools' },
+  { id: 'us_bff',             label: 'US: BFF / Orchestration', icon: 'link', groupId: 'tools' },
+  { id: 'us_backend',         label: 'US: Backend / Core',    icon: 'settings', groupId: 'tools' },
+  { id: 'us_spike',           label: 'US: Tech Spike',        icon: 'microscope', groupId: 'tools' },
+  { id: 'us_techdebt',        label: 'US: Tech Debt',         icon: 'eraser', groupId: 'tools' },
+  { id: 'us_deploy',          label: 'US: Deployment',        icon: 'rocket', groupId: 'tools' },
+  { id: 'us_compliance',      label: 'User Story: Regulatory', icon: 'scale', groupId: 'regs' },
   
-  { id: 'feature_breakdown',  label: 'Feature Breakdown',     icon: '🧩' },
-  { id: 'requirements_scan',  label: 'Requirements Scan',     icon: '🔍' },
-  { id: 'solution_design',    label: 'Solution Design Scan',  icon: '🏗️' },
-  { id: 'ba_analysis',        label: 'Gap Analysis',          icon: '📊' },
-  { id: 'api_nfr',            label: 'API & NFR Specs',       icon: '⏱️' }
+  { id: 'feature_breakdown',  label: 'Feature Breakdown Scan', icon: 'puzzle', groupId: 'tools' },
+  { id: 'requirements_scan',  label: 'Requirements Scan',     icon: 'search', groupId: 'tools' },
+  { id: 'solution_design',    label: 'Solution Design Scan',  icon: 'building', groupId: 'tools' },
+  { id: 'ba_analysis',        label: 'Gap Analysis',          icon: 'bar-chart-3', groupId: 'tools' },
+  { id: 'api_nfr',            label: 'API & NFR Specs',       icon: 'timer', groupId: 'core' }
 ];
 
 const V4_PROMPTS = [
@@ -47,7 +47,7 @@ Provide the following structure (use Markdown):
 
 Focus on digital banking standards, where clarity and error prevention are critical.`,
     tags: ['user story', 'frontend', 'ui', 'ux', 'agile'],
-    tips: ['In digital banking, the "Network failure UX" is critical — never just say "show an error".']
+    tips: ['In digital banking, the "Network failure UX" is critical — avoid generic error messages.']
   },
   {
     id: 'v4-us02',
@@ -227,7 +227,7 @@ Perform a strict critique based on standard Australian digital banking systems. 
 3. What if the user does this action twice simultaneously (double-tap)?
 4. Are there any timezone / DST issues?
 
-Provide a bulleted list of "Missing Requirements" or "Ambiguities" that I need to clarify with the business. Do not rewrite the ACs for me, just show me the holes.`,
+Provide a bulleted list of "Missing Requirements" or "Ambiguities" that I need to clarify with the business. Identify the gaps clearly.`,
     tags: ['analysis', 'requirements', 'qa', 'edge cases', 'review']
   },
   {

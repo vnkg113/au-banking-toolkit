@@ -17,7 +17,8 @@ const state = {
   usage: {},    // id → { count, lastUsed }
   ratings: {},  // id → 1-5
   theme: 'dark', // default
-  collapsedGroups: new Set() // New: track IDs of collapsed sidebar groups
+  collapsedGroups: new Set(), // New: track IDs of collapsed sidebar groups
+  history: []   // New: Recent activity for Stats 2.0
 };
 
 /* ── Storage ────────────────────────────── */
@@ -41,6 +42,9 @@ function loadStorage() {
     const cg = localStorage.getItem('aupk_collapsed_groups');
     if (cg) state.collapsedGroups = new Set(JSON.parse(cg));
     
+    const h = localStorage.getItem('aupk_history');
+    if (h) state.history = JSON.parse(h);
+    
     let t = localStorage.getItem('aupk_theme');
     if (!t) {
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
@@ -57,7 +61,10 @@ function loadStorage() {
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
   const btn = document.getElementById('darkModeToggle');
-  if (btn) btn.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="${state.theme === 'dark' ? 'sun' : 'moon'}" id="themeIcon"></i>`;
+    lucide.createIcons();
+  }
 }
 
 function toggleTheme() {
@@ -71,6 +78,7 @@ function saveUsage()   { localStorage.setItem('aupk_usage',   JSON.stringify(sta
 function saveRatings() { localStorage.setItem('aupk_ratings', JSON.stringify(state.ratings)); }
 function saveCustom_s(){ localStorage.setItem('aupk_custom',  JSON.stringify(state.custom)); }
 function saveGroups()  { localStorage.setItem('aupk_collapsed_groups', JSON.stringify([...state.collapsedGroups])); }
+function saveHistory() { localStorage.setItem('aupk_history', JSON.stringify(state.history)); }
 
 /* ── Helpers ────────────────────────────── */
 function allPrompts() { return [...PROMPTS, ...state.custom]; }
@@ -80,6 +88,11 @@ function trackUsage(id) {
   state.usage[id].count++;
   state.usage[id].lastUsed = Date.now();
   saveUsage();
+
+  // Add to Recent Activity
+  state.history.unshift({ id, time: Date.now() });
+  if (state.history.length > 10) state.history.pop();
+  saveHistory();
 }
 
 function filtered() {
@@ -125,6 +138,68 @@ function filtered() {
   return items;
 }
 
+function copyAsJira(id) {
+  const p = allPrompts().find(x => x.id === id);
+  if (!p) return;
+  const text = `{code:title=${p.title}}\n${p.prompt}\n{code}`;
+  navigator.clipboard.writeText(text);
+  showToast('Copied for Jira');
+}
+
+function copyAsConfluence(id) {
+  const p = allPrompts().find(x => x.id === id);
+  if (!p) return;
+  const text = `|| Prompt Title || ${p.title} ||\n| Context | ${p.when} |\n| Template | {code}${p.prompt}{code} |`;
+  navigator.clipboard.writeText(text);
+  showToast('Copied for Confluence');
+}
+
+function openFill(id) {
+  const p = allPrompts().find(x => x.id === id);
+  if (!p) return;
+  const placeholders = getPlaceholders(p.prompt);
+  const container = document.getElementById('fillInputs');
+  container.innerHTML = placeholders.map(ph => `
+    <div class="fill-field">
+      <label class="fill-label">${ph.replace(/[\[\]]/g, '').replace(/_/g, ' ')}</label>
+      <input type="text" class="fill-input" data-ph="${ph}" placeholder="Enter ${ph.toLowerCase()}...">
+    </div>
+  `).join('');
+
+  const updatePreview = () => {
+    let preview = p.prompt;
+    container.querySelectorAll('.fill-input').forEach(input => {
+      const val = input.value.trim();
+      const ph = input.dataset.ph;
+      if (val) {
+        // Regex to replace all occurrences of this placeholder
+        preview = preview.split(ph).join('<mark class="filled">' + escHtml(val) + '</mark>');
+      } else {
+        preview = preview.split(ph).join('<mark class="placeholder">' + ph + '</mark>');
+      }
+    });
+    document.getElementById('fillPreview').innerHTML = preview;
+  };
+
+  container.querySelectorAll('.fill-input').forEach(input => {
+    input.oninput = updatePreview;
+  });
+
+  updatePreview();
+  document.getElementById('fillOverlay').classList.add('open');
+  
+  const genBtn = document.getElementById('fillGemini');
+  genBtn.onclick = () => {
+    let finalPrompt = p.prompt;
+    container.querySelectorAll('.fill-input').forEach(input => {
+      const val = input.value.trim();
+      if (val) finalPrompt = finalPrompt.split(input.dataset.ph).join(val);
+    });
+    const url = 'https://gemini.google.com/app?q=' + encodeURIComponent(finalPrompt.substring(0, 2000));
+    window.open(url, '_blank');
+  };
+}
+
 function catLabel(id) {
   const c = CATEGORIES.find(x => x.id === id);
   return c ? c.label : id;
@@ -152,17 +227,17 @@ function renderSidebar() {
 
   const nav = document.getElementById('sidebarNav');
   nav.innerHTML = GROUPS.map(group => {
-    const items = CATEGORIES.filter(c => c.groupId === group.id);
+    const items = CATEGORIES.filter(c => (c.groupId || 'core') === group.id);
     if (items.length === 0) return '';
     const isCollapsed = state.collapsedGroups.has(group.id);
     return `<div class="nav-section ${isCollapsed ? 'collapsed' : ''}" data-group="${group.id}">
       <div class="nav-section-label">
-        <span class="group-toggle">${isCollapsed ? '▶' : '▼'}</span> ${group.icon} ${group.label}
+        <span class="group-toggle">${isCollapsed ? '<i data-lucide="chevron-right" style="width:10px;height:10px"></i>' : '<i data-lucide="chevron-down" style="width:10px;height:10px"></i>'}</span> <i data-lucide="${group.icon}" class="nav-icon" style="width:14px;height:14px;margin-right:4px"></i> ${group.label}
       </div>
       <div class="nav-section-items">
         ${items.map(c => `
           <div class="nav-item ${state.cat === c.id ? 'active' : ''}" data-cat="${c.id}">
-            <span class="nav-icon">${c.icon}</span>
+            <i data-lucide="${c.icon}" class="nav-icon" style="width:16px;height:16px"></i>
             <span class="nav-label">${c.label}</span>
             ${(counts[c.id]||0) > 0 ? `<span class="nav-count">${counts[c.id]}</span>` : ''}
           </div>
@@ -219,7 +294,7 @@ function renderQuickFilters() {
     const c = CATEGORIES.find(cat => cat.id === id);
     if (!c) return '';
     const isActive = state.cat === c.id ? 'active' : '';
-    return `<button class="quick-pill ${isActive}" data-cat="${c.id}">${c.icon} ${c.label}</button>`;
+    return `<button class="quick-pill ${isActive}" data-cat="${c.id}"><i data-lucide="${c.icon}" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i> ${c.label}</button>`;
   }).join('');
 
   container.querySelectorAll('.quick-pill').forEach(btn => {
@@ -299,14 +374,14 @@ function renderGrid() {
     const rating = state.ratings[p.id] || 0;
     const isCustom = !!p.isCustom;
     const starsHtml = rating > 0 ? `<span class="card-rating">${'★'.repeat(rating)}</span>` : '';
-    const useHtml   = useCnt >= 3 ? `<span class="card-use-badge" title="${useCnt} copies">🔥 ${useCnt}</span>` : '';
+    const useHtml   = useCnt >= 3 ? `<span class="card-use-badge" title="${useCnt} copies"><i data-lucide="flame" style="width: 10px; height: 10px; margin-right: 2px;"></i> ${useCnt}</span>` : '';
     const editDelHtml = isCustom ? `
-      <button class="card-edit-btn" data-id="${p.id}" title="Edit">✏️</button>
-      <button class="card-del-btn"  data-id="${p.id}" title="Delete">🗑️</button>` : '';
+      <button class="card-edit-btn" data-id="${p.id}" title="Edit"><i data-lucide="edit-2" style="width:14px;height:14px"></i></button>
+      <button class="card-del-btn"  data-id="${p.id}" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button>` : '';
     
     // Everyone gets a duplicate and refine button
-    const dupHtml = `<button class="card-dup-btn" data-id="${p.id}" title="Duplicate to Custom Templates">◨</button>`;
-    const refineHtml = `<button class="card-refine-btn" data-id="${p.id}" title="AI Refine Prompt">🪄</button>`;
+    const dupHtml = `<button class="card-dup-btn" data-id="${p.id}" title="Duplicate to Custom Templates"><i data-lucide="copy" style="width:14px;height:14px"></i></button>`;
+    const refineHtml = `<button class="card-refine-btn" data-id="${p.id}" title="AI Refine Prompt"><i data-lucide="sparkles" style="width:14px;height:14px"></i></button>`;
 
     if (state.view === 'list') {
       return `<div class="card" data-id="${p.id}">
@@ -343,10 +418,12 @@ function renderGrid() {
           ${starsHtml}${useHtml}
           ${(p.tags||[]).slice(0,3).map(t=>`<span class="ctag">${escHtml(t)}</span>`).join('')}
         </div>
-        <button class="copy-btn" data-prompt="${encodeURIComponent(p.prompt)}" data-id="${p.id}">Copy</button>
+        <button class="copy-btn" data-id="${p.id}">Copy</button>
       </div>
     </div>`;
   }).join('');
+
+  lucide.createIcons(); // Initialize Lucide icons after grid render
 
   // Events
   grid.querySelectorAll('.card').forEach(el => {
@@ -364,8 +441,10 @@ function renderGrid() {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       const id = btn.dataset.id;
+      const p = allPrompts().find(x => x.id === id);
+      if (!p) return;
       trackUsage(id);
-      copyText(decodeURIComponent(btn.dataset.prompt), btn, 'Copy', 'Copied!');
+      copyText(p.prompt, btn, 'Copy', 'Copied!');
     });
   });
   grid.querySelectorAll('.card-edit-btn').forEach(btn => {
@@ -402,8 +481,11 @@ function syncDetailFavBtn() {
   const btn = document.getElementById('detailFav');
   if (!btn) return;
   const on = state.favs.has(state.openId);
-  btn.textContent = on ? '★ Unfavourite' : '☆ Favourite';
+  btn.innerHTML = on 
+    ? '<i data-lucide="star" style="width:16px;height:16px;fill:currentColor"></i> <span>Unfavourite</span>' 
+    : '<i data-lucide="star" style="width:16px;height:16px"></i> <span>Favourite</span>';
   btn.classList.toggle('on', on);
+  lucide.createIcons();
 }
 
 /* ── Star Rating ─────────────────────────── */
@@ -412,7 +494,7 @@ function renderStars(id) {
   if (!el) return;
   const current = state.ratings[id] || 0;
   el.innerHTML = [1,2,3,4,5].map(n =>
-    `<button class="star-btn ${n <= current ? 'on' : ''}" data-n="${n}" title="Rate ${n} star${n>1?'s':''}">★</button>`
+    `<button class="star-btn ${n <= current ? 'on' : ''}" data-n="${n}" title="Rate ${n} star${n>1?'s':''}"><i data-lucide="star" style="width:16px;height:16px;${n <= current ? 'fill:currentColor' : ''}"></i></button>`
   ).join('');
   el.querySelectorAll('.star-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -430,6 +512,7 @@ function renderStars(id) {
       el.querySelectorAll('.star-btn').forEach(b => b.classList.remove('hover'));
     });
   });
+  lucide.createIcons();
 }
 
 /* ── Detail Modal ───────────────────────── */
@@ -451,7 +534,7 @@ function openDetail(id) {
   if (phCount > 0) {
     phEl.textContent = `${phCount} variable${phCount > 1?'s':''} to fill in`;
     phEl.style.display = 'inline';
-    if (fillBtn) fillBtn.style.display = 'inline-block';
+    if (fillBtn) fillBtn.style.display = 'inline-flex';
   } else {
     phEl.style.display = 'none';
     if (fillBtn) fillBtn.style.display = 'none';
@@ -460,7 +543,12 @@ function openDetail(id) {
   const tipsSection = document.getElementById('tipsSection');
   const tipsList    = document.getElementById('detailTips');
   if (p.tips && p.tips.length) {
-    tipsList.innerHTML = p.tips.map(t => `<li>${escHtml(t)}</li>`).join('');
+    tipsList.innerHTML = p.tips.map(t => `
+      <li>
+        <i data-lucide="arrow-right" style="width:14px;height:14px;color:var(--accent-lt);flex-shrink:0;margin-top:3px"></i>
+        <span>${escHtml(t)}</span>
+      </li>
+    `).join('');
     tipsSection.style.display = '';
   } else {
     tipsSection.style.display = 'none';
@@ -473,7 +561,15 @@ function openDetail(id) {
   const geminiUrl  = 'https://gemini.google.com/app?q=' + encodeURIComponent(p.prompt.substring(0, 2000));
   geminiBtn.onclick = () => { trackUsage(id); window.open(geminiUrl, '_blank'); };
 
+  const jiraBtn = document.getElementById('copyJira');
+  if (jiraBtn) jiraBtn.onclick = () => copyAsJira(id);
+  const confBtn = document.getElementById('copyConfluence');
+  if (confBtn) confBtn.onclick = () => copyAsConfluence(id);
+
+  if (fillBtn) fillBtn.onclick = () => openFill(id);
+
   document.getElementById('detailOverlay').classList.add('open');
+  lucide.createIcons();
 }
 
 function closeDetail() {
@@ -483,29 +579,60 @@ function closeDetail() {
 }
 
 /* ── AI Refiner ────────────────────────── */
-async function refinePrompt(id, btn) {
+let lastRefineId = null;
+let generatedRefineMaster = "";
+
+function openRefine(id) {
   const p = allPrompts().find(x => x.id === id);
   if (!p) return;
   
-  const metaPrompt = `Act as a world-class Prompt Engineer and Senior Business Analyst specializing in the Australian Banking domain. 
+  lastRefineId = id;
+  const original = p.prompt;
+  
+  const updateRefineUI = (tone = 'analytical') => {
+    const metaPrompt = `Act as a world-class Prompt Engineer and Senior Business Analyst specializing in the Australian Banking domain. 
 
 I want to refine the following prompt to be more precise, professional, and effective for high-stakes banking requirements.
 
 ### ORIGINAL PROMPT:
-\${p.prompt}
+${original}
 
 ### REFINEMENT REQUIREMENTS:
 1. **Domain Precision:** Ensure terminology aligns with APRA (CPS 234, 230, etc.), ASIC, and NPPA standards.
 2. **Structural Clarity:** Use clear headings, markdown formatting, and structured instructions.
 3. **Constraint Management:** Add necessary constraints for security, privacy (Privacy Act 1988), and accessibility (WCAG 2.1).
-4. **Logic & Edge Cases:** Incorporate logic that forces the LLM to think about failures and edge cases.
-5. **Tone:** Professional, analytical, and authoritative.
+4. **Tone:** ${tone.toUpperCase()}. Focus on being ${tone === 'formal' ? 'extremely professional for regulators' : tone === 'precise' ? 'highly technical for developers' : 'analytical and balanced'}.
 
 ### OUTPUT:
 Provide ONLY the refined prompt text, optimized for Gemini 1.5 Pro or GPT-4o.`;
 
+    generatedRefineMaster = metaPrompt;
+    document.getElementById('refineOriginal').textContent = original.substring(0, 300) + (original.length > 300 ? '...' : '');
+    document.getElementById('refineResult').textContent = metaPrompt;
+  };
+
+  updateRefineUI();
+  document.getElementById('refineOverlay').classList.add('open');
+  lucide.createIcons();
+
+  // Bind tones
+  document.querySelectorAll('.tone-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateRefineUI(btn.dataset.tone);
+    };
+  });
+}
+
+function closeRefine() {
+  document.getElementById('refineOverlay').classList.remove('open');
+  lastRefineId = null;
+}
+
+async function refinePrompt(id, btn) {
+  openRefine(id);
   trackUsage(id);
-  await copyText(metaPrompt, btn, '🪄', 'Refiner Copied! ✨');
 }
 
 /* ── Edit Custom Prompt ─────────────────── */
@@ -543,7 +670,7 @@ function deleteCustomPrompt(id) {
   state.custom = state.custom.filter(p => p.id !== id);
   saveCustom_s();
   render();
-  showToast('🗑️ Custom prompt deleted');
+  showToast('Custom prompt deleted');
 }
 
 function duplicatePrompt(id) {
@@ -560,7 +687,7 @@ function duplicatePrompt(id) {
   state.custom.push(duplicated);
   saveCustom_s();
   render();
-  showToast('◨ Prompt duplicated!');
+  showToast('Prompt duplicated!');
 }
 
 /* ── Add / Save Modal ───────────────────── */
@@ -572,6 +699,7 @@ function openAdd() {
   const histWrap = document.getElementById('historyWrap');
   if (histWrap) histWrap.style.display = 'none';
   document.getElementById('addOverlay').classList.add('open');
+  lucide.createIcons();
 }
 function closeAdd() {
   document.getElementById('addOverlay').classList.remove('open');
@@ -586,7 +714,7 @@ function savePrompt() {
   const tagsRaw  = document.getElementById('cTags').value.trim();
 
   if (!title || !category || !prompt) {
-    showToast('⚠️ Please fill in Title, Category, and Prompt'); return;
+    showToast('Please fill in Title, Category, and Prompt'); return;
   }
   const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
 
@@ -606,13 +734,13 @@ function savePrompt() {
       }
       state.custom[idx] = { ...old, title, category, when: when||'Custom prompt', prompt, tags, lastModified: Date.now() };
       saveCustom_s(); closeAdd(); render();
-      showToast('✅ Custom prompt updated!');
+      showToast('Custom prompt updated!');
     }
   } else {
     const p = { id:'custom-'+Date.now(), category, title, when: when||'Custom prompt', prompt, tips:[], tags, isCustom:true, versions: [], lastModified: Date.now() };
     state.custom.push(p);
     saveCustom_s(); closeAdd(); render();
-    showToast('🎉 Custom prompt saved!');
+    showToast('Custom prompt saved!');
   }
 }
 
@@ -624,7 +752,7 @@ function restoreVersion(idx) {
   document.getElementById('cTitle').value = ver.title;
   document.getElementById('cPrompt').value = ver.prompt;
   document.getElementById('cCategory').value = ver.category || p.category;
-  showToast('🕒 Version restored (not yet saved)');
+  showToast('Version restored (not yet saved)');
 }
 
 /* ── Fill Modal ─────────────────────────── */
@@ -662,6 +790,7 @@ function openFillModal() {
   updateFillPreview();
   document.getElementById('fillOverlay').classList.add('open');
   setTimeout(() => { document.getElementById('fillInp0')?.focus(); }, 100);
+  lucide.createIcons();
 }
 
 function updateFillPreview() {
@@ -751,7 +880,7 @@ function openStats() {
     </div>
     
     <div class="stats-section">
-      <div class="m-sec-label">🔥 Usage Heatmap (Last 30 Days)</div>
+      <div class="m-sec-label"><i data-lucide="flame" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px; color: #ff5722;"></i> Usage Heatmap (Last 30 Days)</div>
       <div class="heatmap-container">
         <div class="heatmap-grid">${heatmapHtml}</div>
         <div class="heatmap-legend">
@@ -768,31 +897,35 @@ function openStats() {
 
     <div class="stats-row-group">
       <div class="stats-col">
-        <div class="m-sec-label">🏆 Top Used</div>
+        <div class="m-sec-label"><i data-lucide="award" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px; color: #ffc107;"></i> Top Used (All Time)</div>
         <div class="top-list">
           ${topUsed.map(p => `
             <div class="top-item">
               <span class="top-name">${escHtml(p.title)}</span>
-              <span class="top-count">🔥 ${state.usage[p.id].count}</span>
+              <span class="top-count"><i data-lucide="flame" style="width: 10px; height: 10px; margin-right: 2px;"></i> ${state.usage[p.id].count}</span>
             </div>
           `).join('') || '<div class="t3">No usage data yet</div>'}
         </div>
       </div>
       <div class="stats-col">
-        <div class="m-sec-label">🕒 Recently Edited</div>
+        <div class="m-sec-label"><i data-lucide="history" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px; color: #00bcd4;"></i> Recent Activity</div>
         <div class="top-list">
-          ${recentEdits.map(p => `
-            <div class="top-item">
-              <span class="top-name">${escHtml(p.title)}</span>
-              <span class="top-count">${new Date(p.lastModified).toLocaleDateString()}</span>
-            </div>
-          `).join('') || '<div class="t3">No custom edits yet</div>'}
+          ${state.history.map(h => {
+            const p = allPrompts().find(x => x.id === h.id);
+            if (!p) return '';
+            return `
+              <div class="top-item">
+                <span class="top-name">${escHtml(p.title)}</span>
+                <span class="top-count" style="font-size: 9px; opacity: 0.7;">${new Date(h.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              </div>
+            `;
+          }).join('') || '<div class="t3">No activity yet</div>'}
         </div>
       </div>
     </div>
 
     <div class="stats-section">
-      <div class="m-sec-label">📁 Category Breakdown</div>
+      <div class="m-sec-label"><i data-lucide="folder" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px; color: var(--accent);"></i> Category Breakdown</div>
       <div class="cat-dist">
         ${Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([cid, count]) => `
           <div class="cat-dist-row">
@@ -807,6 +940,7 @@ function openStats() {
     </div>
   `;
   document.getElementById('statsOverlay').classList.add('open');
+  lucide.createIcons();
 }
 
 function closeStats() {
@@ -932,8 +1066,17 @@ function basicMarkdownToHtml(text) {
 
 function copyText(text, btn, orig, done) {
   const doIt = () => {
-    showToast('✅ Prompt copied to clipboard!');
-    if (btn) { btn.textContent = done; setTimeout(()=>btn.textContent=orig, 1500); }
+    showToast('Prompt copied to clipboard!');
+    if (btn) {
+      const span = btn.querySelector('span');
+      if (span) {
+        span.textContent = done;
+        setTimeout(() => span.textContent = orig, 1500);
+      } else {
+        btn.textContent = done;
+        setTimeout(() => btn.textContent = orig, 1500);
+      }
+    }
   };
   
   if (navigator.clipboard && window.ClipboardItem) {
@@ -1055,7 +1198,7 @@ function initEvents() {
   document.getElementById('detailCopy').addEventListener('click', () => {
     const text = document.getElementById('detailPrompt').textContent;
     trackUsage(state.openId);
-    copyText(text, document.getElementById('detailCopy'), '📋 Copy Prompt', '✅ Copied!');
+    copyText(text, document.getElementById('detailCopy'), 'Copy Prompt', 'Copied!');
     render();
   });
   document.getElementById('detailFav').addEventListener('click', () => {
@@ -1070,7 +1213,7 @@ function initEvents() {
   document.getElementById('fillCopy').addEventListener('click', () => {
     const text = getFilledPromptRaw();
     trackUsage(state.openId);
-    copyText(text, document.getElementById('fillCopy'), '📋 Copy Filled Prompt', '✅ Copied!');
+    copyText(text, document.getElementById('fillCopy'), 'Copy Filled Prompt', 'Copied!');
   });
   document.getElementById('fillGemini').addEventListener('click', () => {
     trackUsage(state.openId);
@@ -1118,7 +1261,7 @@ function initEvents() {
   const scanCopy = document.getElementById('scannerCopy');
   if (scanCopy) {
     scanCopy.addEventListener('click', () => {
-      copyText(generatedScannerPrompt, scanCopy, '📋 Copy Prompt', '✅ Copied!');
+      copyText(generatedScannerPrompt, scanCopy, 'Copy Prompt', 'Copied!');
     });
   }
   const scanGemini = document.getElementById('scannerGemini');
@@ -1149,6 +1292,20 @@ function initEvents() {
 
   const exportJira = document.getElementById('scannerExportJira');
   if (exportJira) exportJira.addEventListener('click', exportJiraCSV);
+
+  /* Refine Modal */
+  document.getElementById('refineClose').addEventListener('click', closeRefine);
+  document.getElementById('refineCancel').addEventListener('click', closeRefine);
+  document.getElementById('refineOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeRefine();
+  });
+  document.getElementById('refineCopy').addEventListener('click', () => {
+    copyText(generatedRefineMaster, document.getElementById('refineCopy'), 'Copy Master Prompt', 'Copied!');
+  });
+  document.getElementById('refineGemini').addEventListener('click', () => {
+    const geminiUrl  = 'https://gemini.google.com/app?q=' + encodeURIComponent(generatedRefineMaster.substring(0, 2000));
+    window.open(geminiUrl, '_blank');
+  });
 
   // Tab switching logic
   document.querySelectorAll('.m-tab-btn').forEach(btn => {
@@ -1262,15 +1419,21 @@ function runIntelAnalysis() {
   // Render
   document.getElementById('intelResultSection').style.display = 'block';
   document.getElementById('val-invest').textContent = metrics.invest + '%';
-  document.getElementById('val-bank').textContent = metrics.risk + (metrics.risk === 'Low' ? ' ✅' : ' ⚠️');
+  document.getElementById('val-bank').textContent = metrics.risk + (metrics.risk === 'Low' ? ' (Low)' : ' (Warning)');
   
   const riskCard = document.getElementById('metric-bank');
   riskCard.className = 'intel-metric ' + (metrics.risk === 'High' ? 'risk-high' : metrics.risk === 'Medium' ? 'risk-med' : '');
 
   document.getElementById('intelGherkin').textContent = metrics.gherkin;
-  document.getElementById('intelTips').innerHTML = metrics.tips.map(t => `<li>${t}</li>`).join('');
+  document.getElementById('intelTips').innerHTML = metrics.tips.map(t => `
+    <li>
+      <i data-lucide="check-circle" style="width:14px;height:14px;color:var(--accent-lt);flex-shrink:0;margin-top:2px"></i>
+      <span>${t}</span>
+    </li>
+  `).join('');
+  lucide.createIcons();
   
-  showToast('🧠 Analysis Complete');
+  showToast('Analysis Complete');
 }
 
 /* ── Deep Link ──────────────────────────── */
@@ -1299,7 +1462,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Inject "Recent" category
   if (!CATEGORIES.find(c => c.id === 'recent')) {
     const allIdx = CATEGORIES.findIndex(c => c.id === 'all');
-    CATEGORIES.splice(allIdx + 1, 0, { id: 'recent', label: 'Recently Used', icon: '🕘' });
+    CATEGORIES.splice(allIdx + 1, 0, { id: 'recent', label: 'Recently Used', icon: 'clock' });
   }
 
   // Merge V4 & HowTo Data
@@ -1307,9 +1470,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof V4_PROMPTS !== 'undefined') PROMPTS.push(...V4_PROMPTS);
   if (typeof HOWTO_CATEGORIES !== 'undefined') CATEGORIES.push(...HOWTO_CATEGORIES);
   if (typeof HOWTO_PROMPTS !== 'undefined') PROMPTS.push(...HOWTO_PROMPTS);
+  if (typeof EXTRA_CATEGORIES !== 'undefined') CATEGORIES.push(...EXTRA_CATEGORIES);
+  if (typeof EXTRA_PROMPTS !== 'undefined') PROMPTS.push(...EXTRA_PROMPTS);
+  if (typeof V5_CATEGORIES !== 'undefined') CATEGORIES.push(...V5_CATEGORIES);
+  if (typeof V5_PROMPTS !== 'undefined') PROMPTS.push(...V5_PROMPTS);
 
   loadStorage();
   initEvents();
   render();
   checkDeepLink();
+
+  // Handle missing retro icon
+  const iconImg = document.querySelector('#welcomeIcon img');
+  if (iconImg) {
+    iconImg.onerror = () => {
+      iconImg.src = 'retro_nice_guy_icon.png'; // Fallback to previous if missing
+      iconImg.onerror = () => {
+        document.getElementById('welcomeIcon').innerHTML = '😊'; // Ultimate fallback
+      };
+    };
+  }
 });

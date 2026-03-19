@@ -6,18 +6,20 @@
   <title>AuPromptKit — Australian Banking BA Toolkit</title>
   <meta name="description" content="Curated AI prompt library for Business Analysts in the Australian Banking and Financial Services sector. Covering APRA, CDR, NPP, and more."/>
   <link rel="stylesheet" href="style.css"/>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
 <!-- ── SIDEBAR ──────────────────────────────────────────── -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-mark">🦘</div>
+    <div class="logo-mark"><i data-lucide="layout"></i></div>
     <div>
       <div class="logo-name">AuPromptKit</div>
       <div class="logo-tag">Australian Banking Toolkit</div>
     </div>
-    <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">‹</button>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar"><i data-lucide="chevron-left"></i></button>
   </div>
 
   <nav class="sidebar-nav" id="sidebarNav">
@@ -27,23 +29,23 @@
   <div class="sidebar-foot">
     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
       <button class="btn-add" id="openAdd" style="margin-bottom: 0;">
-        <span>＋</span> <span class="sidebar-text">Add Prompt</span>
+        <i data-lucide="plus" style="width: 14px; height: 14px;"></i> <span class="sidebar-text">Add Prompt</span>
       </button>
-      <button class="btn-tool" id="openStats" title="View basic stats">📊 <span class="sidebar-text">Stats</span></button>
+      <button class="btn-tool" id="openStats" title="View basic stats"><i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i> <span class="sidebar-text">Stats</span></button>
     </div>
     <button class="btn-add" id="openScanner" style="margin-bottom: 8px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
-      <span>🪄</span> <span class="sidebar-text">Feature Breakdown</span>
+      <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> <span class="sidebar-text">Feature Breakdown</span>
     </button>
     <div style="display: flex; gap: 8px;">
-      <button class="btn-tool" id="exportBtn" title="Export custom prompts">⬇ <span class="sidebar-text">Export</span></button>
-      <button class="btn-tool" id="importBtn" title="Import custom prompts">⬆ <span class="sidebar-text">Import</span></button>
+      <button class="btn-tool" id="exportBtn" title="Export custom prompts"><i data-lucide="download" style="width: 14px; height: 14px;"></i> <span class="sidebar-text">Export</span></button>
+      <button class="btn-tool" id="importBtn" title="Import custom prompts"><i data-lucide="upload" style="width: 14px; height: 14px;"></i> <span class="sidebar-text">Import</span></button>
       <input type="file" id="importFile" accept=".json" style="display: none;" />
     </div>
   </div>
 </aside>
 
 <!-- Collapsed sidebar expand tab -->
-<button class="sidebar-expand-tab" id="sidebarExpandTab" title="Expand sidebar">🦘</button>
+<button class="sidebar-expand-tab" id="sidebarExpandTab" title="Expand sidebar"><i data-lucide="menu"></i></button>
 
 <!-- ── MAIN ─────────────────────────────────────────────── -->
 <main class="main">
@@ -53,13 +55,13 @@
     <span class="topbar-count" id="pageCount"></span>
 
     <div class="search-box">
-      <span class="search-ic">⌕</span>
+      <i data-lucide="search" class="search-ic" style="width: 16px; height: 16px;"></i>
       <input type="text" id="searchInp" class="search-inp" placeholder="Search prompts… (e.g. APRA, CDR, NPP)" autocomplete="off"/>
-      <button class="search-clear" id="searchClear" style="display:none">✕</button>
+      <button class="search-clear" id="searchClear" style="display:none"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
     </div>
 
     <div class="topbar-actions">
-      <button id="darkModeToggle" class="view-btn" title="Toggle Dark Mode" style="border-radius: 50%;">🌙</button>
+      <button id="darkModeToggle" class="view-btn" title="Toggle Dark Mode" style="border-radius: 50%;"><i data-lucide="moon" id="themeIcon"></i></button>
       <select id="sortSelect" class="sort-select" title="Sort prompts">
         <option value="default">Default</option>
         <option value="az">A → Z</option>
@@ -67,8 +69,8 @@
         <option value="used">Most Used</option>
         <option value="recent">Recently Used</option>
       </select>
-      <button class="view-btn active" id="gridBtn" title="Grid view">⊞</button>
-      <button class="view-btn" id="listBtn" title="List view">☰</button>
+      <button class="view-btn active" id="gridBtn" title="Grid view"><i data-lucide="layout-grid"></i></button>
+      <button class="view-btn" id="listBtn" title="List view"><i data-lucide="list"></i></button>
     </div>
   </header>
 
@@ -79,10 +81,12 @@
 
   <!-- Cute Welcome Heading -->
   <div class="cute-welcome" id="cuteWelcome">
-    <div class="cute-icon">🐨</div>
+    <div class="cute-icon" id="welcomeIcon">
+      <img src="happy_retro_guy_icon.png" alt="Helping Hand" style="width: 48px; border-radius: 4px; image-rendering: pixelated; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+    </div>
     <div class="cute-text">
-      <span class="cute-title">G'day there, BA! 👋</span>
-      <span class="cute-subtitle">Ready to write some top-notch requirements today? Let's make magic happen! ✨</span>
+      <span class="cute-title">Your Regulatory Partner</span>
+      <span class="cute-subtitle">Expertly crafted frameworks for the modern BA. Let's simplify your workflow today. <span style="color:var(--accent-lt); font-weight:bold;">Status: Ready.</span></span>
     </div>
   </div>
 
@@ -93,7 +97,7 @@
   <div class="prompt-area">
     <div class="prompt-grid" id="promptGrid"></div>
     <div class="empty" id="emptyState" style="display:none">
-      <div class="empty-ico">🔎</div>
+      <div class="empty-ico"><i data-lucide="search" style="width: 48px; height: 48px; opacity: 0.5;"></i></div>
       <div class="empty-title">No prompts found</div>
       <div class="empty-sub">Try adjusting your search or category filter</div>
     </div>
@@ -108,32 +112,52 @@
         <span id="detailChip" class="cat-chip"></span>
         <h2 class="m-title" id="detailTitle"></h2>
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <div class="star-rating" id="detailStars"></div>
-        <button class="m-close" id="detailClose">✕</button>
+      <div class="m-header-right">
+        <div class="star-rating" id="detailStars"><!-- dynamic --></div>
+        <button class="m-close" id="detailClose"><i data-lucide="x"></i></button>
       </div>
     </div>
 
     <div class="m-body">
       <div>
-        <div class="m-sec-label">📌 When to use</div>
+        <div class="m-sec-label"><i data-lucide="pin" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i> When to use</div>
         <div class="m-when" id="detailWhen"></div>
       </div>
       <div>
-        <div class="m-sec-label">💬 Prompt Template <span class="placeholder-count" id="placeholderCount"></span></div>
+        <div class="m-sec-label"><i data-lucide="message-square" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i> Prompt Template <span class="placeholder-count" id="placeholderCount"></span></div>
         <div class="prompt-box" id="detailPrompt"></div>
       </div>
       <div id="tipsSection">
-        <div class="m-sec-label">💡 Tips</div>
+        <div class="m-sec-label"><i data-lucide="lightbulb" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i> Tips</div>
         <ul class="tips-list" id="detailTips"></ul>
       </div>
     </div>
 
     <div class="m-footer">
-      <button class="btn-fav" id="detailFav">☆ Favourite</button>
-      <button class="btn-fill" id="detailFill" style="display:none">✏️ Fill Variables</button>
-      <button class="btn-gemini" id="detailGemini">✦ Open in Gemini</button>
-      <button class="btn-copy-main" id="detailCopy">📋 Copy Prompt</button>
+      <div class="m-footer-left">
+        <button class="btn-modal-action btn-fav" id="detailFav">
+          <i data-lucide="star"></i> <span>Favourite</span>
+        </button>
+        <button class="btn-modal-action btn-fill" id="detailFill" style="display:none">
+          <i data-lucide="edit-3"></i> <span>Fill Variables</span>
+        </button>
+        <div class="format-group">
+          <button class="btn-modal-action btn-tool" id="copyJira" title="Copy for Jira {code}">
+            <i data-lucide="code"></i> <span>Jira</span>
+          </button>
+          <button class="btn-modal-action btn-tool" id="copyConfluence" title="Copy for Confluence Table">
+            <i data-lucide="columns"></i> <span>Conf</span>
+          </button>
+        </div>
+      </div>
+      <div class="m-footer-right">
+        <button class="btn-modal-action btn-gemini" id="detailGemini">
+          <i data-lucide="sparkles"></i> <span>Open in Gemini</span>
+        </button>
+        <button class="btn-modal-action btn-copy-main" id="detailCopy">
+          <i data-lucide="copy"></i> <span>Copy Prompt</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -143,22 +167,29 @@
   <div class="modal modal-fill">
     <div class="m-header">
       <div class="m-header-left">
-        <span class="cat-chip chip-requirements">✏️ Fill Variables</span>
+        <span class="cat-chip chip-requirements"><i data-lucide="edit-3" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i> Fill Variables</span>
         <h2 class="m-title" id="fillTitle">Complete Your Prompt</h2>
       </div>
-      <button class="m-close" id="fillClose">✕</button>
+      <button class="m-close" id="fillClose"><i data-lucide="x"></i></button>
     </div>
     <div class="m-body fill-layout">
       <div class="fill-inputs" id="fillInputs"><!-- dynamic --></div>
       <div class="fill-preview-wrap">
-        <div class="m-sec-label">📋 Live Preview</div>
+        <div class="m-sec-label"><i data-lucide="file-text" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i> Live Preview</div>
         <div class="prompt-box fill-preview" id="fillPreview"></div>
       </div>
     </div>
     <div class="m-footer">
-      <button class="btn-cancel-sm" id="fillCancel">← Back</button>
-      <button class="btn-gemini" id="fillGemini">✦ Open in Gemini</button>
-      <button class="btn-copy-main" id="fillCopy">📋 Copy Filled Prompt</button>
+      <button class="btn-modal-action btn-fav" id="fillCancel" style="background:var(--border-s); border-color:var(--border-s);">
+        <i data-lucide="arrow-left"></i> <span>Back</span>
+      </button>
+      <div style="flex:1"></div>
+      <button class="btn-modal-action btn-gemini" id="fillGemini">
+        <i data-lucide="sparkles"></i> <span>Open in Gemini</span>
+      </button>
+      <button class="btn-modal-action btn-copy-main" id="fillCopy">
+        <i data-lucide="copy"></i> <span>Copy Filled Prompt</span>
+      </button>
     </div>
   </div>
 </div>
@@ -171,7 +202,7 @@
       <div class="m-header-left">
         <h2 class="m-title" id="addModalTitle">Add Custom Prompt</h2>
       </div>
-      <button class="m-close" id="addClose">✕</button>
+      <button class="m-close" id="addClose"><i data-lucide="x"></i></button>
     </div>
 
     <div class="m-body">
@@ -193,7 +224,7 @@
       </div>
 
       <div id="historyWrap" style="display:none; margin-top: 10px;">
-        <div class="m-sec-label">🕒 Edit History</div>
+        <div class="m-sec-label"><i data-lucide="history" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i> Edit History</div>
         <div id="historyList" class="history-list"></div>
       </div>
       <div class="form-row">
@@ -203,8 +234,13 @@
     </div>
 
     <div class="m-footer">
-      <button class="btn-cancel-sm" id="addCancel">Cancel</button>
-      <button class="btn-save-sm" id="addSave">Save Prompt</button>
+      <button class="btn-modal-action btn-fav" id="addCancel" style="background:var(--border-s); border-color:var(--border-s);">
+        <i data-lucide="x"></i> <span>Cancel</span>
+      </button>
+      <div style="flex:1"></div>
+      <button class="btn-modal-action btn-copy-main" id="addSave" style="background:var(--accent); border-color:var(--accent);">
+        <i data-lucide="save"></i> <span>Save Prompt</span>
+      </button>
     </div>
   </div>
 </div>
@@ -217,7 +253,7 @@
         <span class="cat-chip chip-feature_breakdown">🪄 AI Feature Breakdown</span>
         <h2 class="m-title" id="scannerTitle">Generate Breakdown Prompt</h2>
       </div>
-      <button class="m-close" id="scannerClose">✕</button>
+      <button class="m-close" id="scannerClose"><i data-lucide="x"></i></button>
     </div>
 
     <div class="m-tabs">
@@ -290,7 +326,7 @@
           </div>
         </div>
         
-        <div class="m-sec-label">📋 Gherkin Transformation</div>
+        <div class="m-sec-label"><i data-lucide="file-text" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;"></i> Gherkin Transformation</div>
         <div class="prompt-box" id="intelGherkin" style="max-height: 150px; overflow-y: auto;"></div>
         
         <div class="m-sec-label" style="margin-top:12px">💡 Improvement Suggestions</div>
@@ -298,25 +334,90 @@
       </div>
     </div>
 
-    <div class="m-footer" style="flex-wrap: wrap; gap: 8px;">
-      <button class="btn-cancel-sm" id="scannerCancel">Close</button>
+    <div class="m-footer" style="gap: 12px;">
+      <button class="btn-modal-action btn-fav" id="scannerCancel" style="background:var(--border-s); border-color:var(--border-s);">
+        <i data-lucide="x"></i> <span>Close</span>
+      </button>
       <div style="flex:1"></div>
-      <button class="btn-gemini" id="scannerGemini" style="display:none">✦ Open in Gemini</button>
-      <button class="btn-copy-main" id="scannerCopy" style="display:none; margin-right: 12px;">📋 Copy Prompt</button>
-      <button class="btn-save-sm" id="scannerGenerate">Generate Prompt 🪄</button>
-      <button class="btn-save-sm" id="scannerExportJira" style="background:#0052cc; border-color:#0052cc; color:#fff;">Download Jira CSV ⬇</button>
+      <button class="btn-modal-action btn-gemini" id="scannerGemini" style="display:none">
+        <i data-lucide="sparkles"></i> <span>Open in Gemini</span>
+      </button>
+      <button class="btn-modal-action btn-copy-main" id="scannerCopy" style="display:none;">
+        <i data-lucide="copy"></i> <span>Copy Prompt</span>
+      </button>
+      <button class="btn-modal-action btn-copy-main" id="scannerGenerate" style="background:var(--accent); border-color:var(--accent);">
+        <i data-lucide="sparkles"></i> <span>Generate Prompt</span>
+      </button>
+      <button class="btn-modal-action btn-copy-main" id="scannerExportJira" style="background:#0052cc; border-color:#0052cc;">
+        <i data-lucide="download"></i> <span>Download Jira CSV</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── REFINEMENT MODAL ────────────────────────────────────── -->
+<div class="overlay" id="refineOverlay">
+  <div class="modal modal-detail" style="width: min(720px, 100%)">
+    <div class="m-header">
+      <div class="m-header-left">
+        <span class="cat-chip" style="background: var(--accent-dim); color: var(--accent-lt);">🪄 AI Refine Prompt</span>
+        <h2 class="m-title" id="refineTitle">Refine with Prompt Engineering</h2>
+      </div>
+      <button class="m-close" id="refineClose"><i data-lucide="x"></i></button>
+    </div>
+    <div class="m-body">
+      <div class="m-sec-label">Original Prompt</div>
+      <div class="prompt-box" id="refineOriginal" style="max-height: 120px; font-size: 11px; opacity: 0.7;"></div>
+      
+      <div class="m-sec-label" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <span>Engineering Master Prompt</span>
+        <div class="tone-selector" id="toneSelector" style="display: flex; gap: 4px;">
+          <button class="tone-btn active" data-tone="analytical">Analytical</button>
+          <button class="tone-btn" data-tone="formal">Formal</button>
+          <button class="tone-btn" data-tone="precise">Precise</button>
+        </div>
+      </div>
+      <div class="m-when" style="font-size: 13px; margin-bottom: 8px;">Copy this master prompt to your preferred LLM (Gemini/GPT) to get a high-quality, domain-aware refinement.</div>
+      <div class="prompt-box" id="refineResult" style="user-select: all; background: rgba(163, 177, 138, 0.05); border-color: var(--accent-dim);"></div>
+      
+      <div class="tips-list" style="margin-top: 10px;">
+        <li>This refinement includes APRA/CDR domain awareness and structural optimizations.</li>
+        <li>Paste the resulting text back into a Custom Prompt to save it for future use.</li>
+      </div>
+    </div>
+    <div class="m-footer">
+      <button class="btn-cancel-sm" id="refineCancel">Close</button>
+      <button class="btn-gemini" id="refineGemini">✦ Open in Gemini</button>
+      <button class="btn-copy-main" id="refineCopy">📋 Copy Master Prompt</button>
+    </div>
+  </div>
+
+<!-- ── COMMAND PALETTE ───────────────────────────────────── -->
+<div class="overlay" id="paletteOverlay" style="align-items: flex-start; padding-top: 15vh;">
+  <div class="palette-container">
+    <div class="palette-search">
+      <span class="palette-search-ic">🔍</span>
+      <input type="text" id="paletteInp" placeholder="Type a command or search prompts..." autocomplete="off">
+      <span class="palette-hint">ESC to close</span>
+    </div>
+    <div id="paletteList" class="palette-list">
+      <!-- Results populated by palette.js -->
+    </div>
+    <div class="palette-footer">
+      <span><kbd>↑↓</kbd> to navigate</span>
+      <span><kbd>ENTER</kbd> to select</span>
     </div>
   </div>
 </div>
 
 <!-- ── STATS MODAL ───────────────────────────────────────── -->
 <div class="overlay" id="statsOverlay">
-  <div class="modal modal-add" style="width: min(500px, 100%)">
+  <div class="modal modal-add" style="width: min(600px, 100%)">
     <div class="m-header">
       <div class="m-header-left">
         <h2 class="m-title">Library Insights</h2>
       </div>
-      <button class="m-close" id="statsClose">✕</button>
+      <button class="m-close" id="statsClose"><i data-lucide="x"></i></button>
     </div>
     <div class="m-body" id="statsBody">
       <!-- dynamic -->
@@ -334,7 +435,9 @@
 <script src="data.js"></script>
 <script src="data-extra.js"></script>
 <script src="data-v4.js"></script>
+<script src="data-v5.js"></script>
 <script src="data-howto.js"></script>
+<script src="palette.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

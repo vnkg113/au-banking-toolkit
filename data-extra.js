@@ -7,17 +7,16 @@
 // ============================================================
 
 const EXTRA_CATEGORIES = [
-  { id: 'mobile_apps',   label: 'Mobile & Digital',      icon: '📱' },
-  { id: 'tech_spikes',   label: 'Spikes & Tech Debt',    icon: '🛠️' },
-  { id: 'integration',   label: 'Architecture & NFRs',   icon: '🏗️' },
-  { id: 'uiux',          label: 'UI/UX Design',          icon: '🎨' },
-  { id: 'discovery',     label: 'Product Discovery',     icon: '🔭' },
-  { id: 'software_dev',  label: 'Software Development',  icon: '💻' },
-  { id: 'english',       label: 'Business English',      icon: '🗣️' },
-  { id: 'ba_cert',       label: 'BA Certification',      icon: '🎓' },
-  { id: 'cmd_rules',     label: 'Command Rules',         icon: '⚙️'  },
-  { id: 'product_mgmt',  label: 'Product Management',    icon: '🚀' },
-  { id: 'agile',         label: 'Agile & Scrum',         icon: '🔄' },
+  { id: 'tech_spikes',   label: 'Spikes & Tech Debt',    icon: 'wrench', groupId: 'tools' },
+  { id: 'integration',   label: 'Architecture & NFRs',   icon: 'building', groupId: 'core' },
+  { id: 'uiux',          label: 'UI/UX Design',          icon: 'palette', groupId: 'tools' },
+  { id: 'discovery',     label: 'Product Discovery',     icon: 'search', groupId: 'tools' },
+  { id: 'software_dev',  label: 'Software Development',  icon: 'monitor', groupId: 'tools' },
+  { id: 'english',       label: 'Business English',      icon: 'message-square', groupId: 'guidance' },
+  { id: 'ba_cert',       label: 'BA Certification',      icon: 'graduation-cap', groupId: 'guidance' },
+  { id: 'cmd_rules',     label: 'Command Rules',         icon: 'settings', groupId: 'guidance' },
+  { id: 'product_mgmt',  label: 'Product Management',    icon: 'rocket', groupId: 'tools' },
+  { id: 'agile',         label: 'Agile & Scrum',         icon: 'refresh-cw', groupId: 'tools' },
 ];
 
 const EXTRA_PROMPTS = [
@@ -25,7 +24,7 @@ const EXTRA_PROMPTS = [
   // ─── MOBILE & DIGITAL ──────────────────────────────────────
   {
     id: 'xmob-001',
-    category: 'mobile_apps',
+    category: 'mobile',
     title: 'Mobile App Permissions Strategy',
     when: 'When writing requirements for a feature that needs access to device hardware (camera, location, contacts).',
     prompt: `Create a Mobile Permissions Strategy and requirement breakdown for a feature requiring: [e.g., Location Services and Camera].
@@ -46,7 +45,7 @@ Write this as a series of User Stories with Acceptance Criteria.`,
   },
   {
     id: 'xmob-002',
-    category: 'mobile_apps',
+    category: 'mobile',
     title: 'Push Notification Matrix',
     when: 'When designing a notification system and you need to map out triggers, payloads, and behaviors.',
     prompt: `Define a Push Notification and In-App Message matrix for: [FEATURE NAME e.g., Fraud alert on a card transaction].
@@ -70,7 +69,7 @@ Provide 3 distinct scenarios.`,
   },
   {
     id: 'xmob-003',
-    category: 'mobile_apps',
+    category: 'mobile',
     title: 'Offline Mode & Data Syncing Requirements',
     when: 'When designing an app that must handle poor network connectivity elegantly.',
     prompt: `Draft technical requirements for Offline Mode resilience for: [e.g., Viewing account balances and initiating a transfer].
@@ -91,7 +90,7 @@ Write Acceptance Criteria covering these negative paths.`,
   },
   {
     id: 'xmob-004',
-    category: 'mobile_apps',
+    category: 'mobile',
     title: 'Biometric Auth & Tokenization',
     when: 'When implementing FaceID, TouchID, or Android Biometric Prompt for login or payments.',
     prompt: `Write business logic requirements and sequence for integrating Native Biometrics (FaceID/TouchID) for [Login / Payment Authorization].
@@ -112,7 +111,7 @@ Output as a detailed acceptance specification.`,
   },
   {
     id: 'xmob-005',
-    category: 'mobile_apps',
+    category: 'mobile',
     title: 'Mobile App Accessibility (WCAG) Assessment',
     when: 'When writing acceptance criteria for UI components to ensure WCAG 2.1 AA accessibility compliance.',
     prompt: `Draft Accessibility (WCAG 2.1 AA) compliance requirements for: [FEATURE — e.g., A multi-step account opening form].
@@ -292,7 +291,7 @@ Specification including:
 Format for both Data Engineers and Backend Developers.`,
     tips: [
       'Ordering is tricky in distributed systems — defining the right Partition Key is critical.',
-      'Event Notification (just the ID) vs Event-Carried State Transfer (full object) is an important design decision.',
+      'The choice between Event Notification (ID only) and Event-Carried State Transfer (full object) is a critical design decision.',
     ],
     tags: ['kafka', 'events', 'pub-sub', 'asynchronous', 'messaging'],
   },
@@ -630,7 +629,7 @@ Structure:
 Include a blameless principle statement at the top.`,
     tips: [
       'Blameless = focus on the system, not the person who made the change.',
-      'Action items without an owner and due date are just wishes.',
+      'Action items without an owner and due date are ineffective.',
     ],
     tags: ['incident', 'post-mortem', 'DevOps', 'reliability', 'SRE'],
   },
@@ -891,7 +890,7 @@ Output as markdown with bold headers for each story. [FORMAT]
 Each story must have 3+ ACs referencing ePayments Code obligations. [CONSTRAINTS]"
 ─────────────────────────────────────────`,
     tips: [
-      'You do not need every element every time — ROLE + TASK + FORMAT is the minimum.',
+      'Select the appropriate elements for your context — ROLE + TASK + FORMAT is the core requirement.',
       'If you get a bad answer, identify which element was missing or vague.',
       'Save your best prompts using the "Add Custom Prompt" button in this toolkit.',
     ],

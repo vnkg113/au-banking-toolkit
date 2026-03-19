@@ -3,10 +3,10 @@
  */
 
 const HOWTO_CATEGORIES = [
-    { id: 'howto_app', label: 'App Mastery', icon: '📱', groupId: 'guidance' },
-    { id: 'howto_scrum', label: 'Scrum Events', icon: '🔄', groupId: 'guidance' },
-    { id: 'howto_story', label: 'User Stories', icon: '📝', groupId: 'guidance' },
-    { id: 'howto_banking', label: 'Banking BA 101', icon: '🏦', groupId: 'guidance' }
+    { id: 'howto_app', label: 'App Mastery', icon: 'smartphone', groupId: 'guidance' },
+    { id: 'howto_scrum', label: 'Scrum Events', icon: 'refresh-cw', groupId: 'guidance' },
+    { id: 'howto_story', label: 'User Stories', icon: 'file-text', groupId: 'guidance' },
+    { id: 'howto_banking', label: 'Banking BA 101', icon: 'landmark', groupId: 'guidance' }
 ];
 
 const HOWTO_PROMPTS = [

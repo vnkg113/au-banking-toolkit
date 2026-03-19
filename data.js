@@ -5,35 +5,35 @@
 // ============================================================
 
 const GROUPS = [
-  { id: 'core',        label: 'Core Frameworks',   icon: '📁' },
-  { id: 'regs',        label: 'Banking Regulations',icon: '⚖️' },
-  { id: 'domains',     label: 'Banking Domains',   icon: '🏦' },
-  { id: 'tools',       label: 'Tools & Internal',  icon: '🛠️' },
-  { id: 'guidance',    label: 'Guidance & Knowledge', icon: '📖' },
+  { id: 'core',        label: 'Core Frameworks',   icon: 'folder' },
+  { id: 'regs',        label: 'Banking Regulations',icon: 'scale' },
+  { id: 'domains',     label: 'Banking Domains',   icon: 'landmark' },
+  { id: 'tools',       label: 'Tools & Internal',  icon: 'wrench' },
+  { id: 'guidance',    label: 'Guidance & Knowledge', icon: 'book-open' },
 ];
 
 const CATEGORIES = [
-  { id: 'all',          label: 'All Prompts',         icon: '🗂️', groupId: 'core' },
-  { id: 'requirements', label: 'Requirements',         icon: '📋', groupId: 'core' },
-  { id: 'diagrams',     label: 'Diagrams & Flows',     icon: '🔷', groupId: 'core' },
-  { id: 'api',          label: 'API Specifications',   icon: '🔗', groupId: 'core' },
-  { id: 'documentation',label: 'PRD & Docs',           icon: '📝', groupId: 'core' },
-  { id: 'data',         label: 'Data & SQL',            icon: '📊', groupId: 'core' },
+  { id: 'all',          label: 'All Prompts',         icon: 'layers', groupId: 'core' },
+  { id: 'requirements', label: 'Requirements',         icon: 'clipboard-list', groupId: 'core' },
+  { id: 'diagrams',     label: 'Diagrams & Flows',     icon: 'component', groupId: 'core' },
+  { id: 'api',          label: 'API Specifications',   icon: 'link', groupId: 'core' },
+  { id: 'documentation',label: 'PRD & Docs',           icon: 'file-text', groupId: 'core' },
+  { id: 'data',         label: 'Data & SQL',            icon: 'bar-chart-3', groupId: 'core' },
   
-  { id: 'apra',         label: 'APRA & Prudential',    icon: '🏛️', groupId: 'regs' },
-  { id: 'aml',          label: 'AML & Compliance',     icon: '🛡️', groupId: 'regs' },
-  { id: 'cdr',          label: 'CDR / Open Banking',   icon: '🔓', groupId: 'regs' },
-  { id: 'fraud',        label: 'Fraud & Risk',         icon: '🚨', groupId: 'regs' },
+  { id: 'apra',         label: 'APRA & Prudential',    icon: 'building-2', groupId: 'regs' },
+  { id: 'aml',          label: 'AML & Compliance',     icon: 'shield-check', groupId: 'regs' },
+  { id: 'cdr',          label: 'CDR / Open Banking',   icon: 'unlock', groupId: 'regs' },
+  { id: 'fraud',        label: 'Fraud & Risk',         icon: 'alert-triangle', groupId: 'regs' },
 
-  { id: 'loans',        label: 'Lending & Mortgages',  icon: '🏠', groupId: 'domains' },
-  { id: 'mobile',       label: 'Mobile Banking',       icon: '📱', groupId: 'domains' },
-  { id: 'npp',          label: 'NPP & Payments',       icon: '💸', groupId: 'domains' },
+  { id: 'loans',        label: 'Lending & Mortgages',  icon: 'home', groupId: 'domains' },
+  { id: 'mobile',       label: 'Mobile Banking',       icon: 'smartphone', groupId: 'domains' },
+  { id: 'npp',          label: 'NPP & Payments',       icon: 'banknote', groupId: 'domains' },
 
-  { id: 'prototyping',  label: 'Prototyping & UI',     icon: '🎨', groupId: 'tools' },
-  { id: 'stakeholder',  label: 'Stakeholder Comms',    icon: '🤝', groupId: 'tools' },
-  { id: 'testing',      label: 'Test Cases & QA',      icon: '🧪', groupId: 'tools' },
-  { id: 'ai_setup',     label: 'AI Context Setup',     icon: '🤖', groupId: 'tools' },
-  { id: 'favourites',   label: 'Favourites',           icon: '⭐', groupId: 'core' },
+  { id: 'prototyping',  label: 'Prototyping & UI',     icon: 'palette', groupId: 'tools' },
+  { id: 'stakeholder',  label: 'Stakeholder Comms',    icon: 'handshake', groupId: 'tools' },
+  { id: 'testing',      label: 'Test Cases & QA',      icon: 'beaker', groupId: 'tools' },
+  { id: 'ai_setup',     label: 'AI Context Setup',     icon: 'bot', groupId: 'tools' },
+  { id: 'favourites',   label: 'Favourites',           icon: 'star', groupId: 'core' },
 ];
 
 const PROMPTS = [
@@ -151,7 +151,7 @@ Flow description:
 [Describe the flow step by step]
 
 Requirements:
-- Show the happy path completely
+- Show the happy path in full
 - Show the main failure/rejection path
 - Include NPP clearing and settlement steps if applicable
 - Show AUSTRAC reporting trigger if threshold is crossed
@@ -656,7 +656,7 @@ Note: Tipping-off prohibition (s.123A AML/CTF Act) — do NOT communicate report
     tips: [
       'AUSTRAC has strict submission timelines — late filings are a breach; build alerts into the workflow',
       'SMRs require a narrative field — the quality of the narrative affects AUSTRAC\'s ability to act',
-      'IFTI applies to ALL international transfers, not just suspicious ones — often overlooked',
+      'IFTI applies to ALL international transfers, not only suspicious ones — often overlooked',
     ],
     tags: ['AUSTRAC', 'TTR', 'SMR', 'IFTI', 'regulatory reporting', 'AML'],
   },
